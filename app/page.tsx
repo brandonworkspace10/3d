@@ -1,5 +1,5 @@
-import { ComponentExample } from "@/components/ui/example/component-example";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <ComponentExample />;
+  redirect("/canvas");
 }
