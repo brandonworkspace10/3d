@@ -116,6 +116,86 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ========== Handle base styles ========== */
+/* Handles are always visible — solid filled circles */
+.canvas-dark-mode-wrapper .react-flow__handle {
+  opacity: 1;
+  pointer-events: all;
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  background: oklch(0.6 0 0) !important;
+  box-sizing: border-box;
+}
+
+/* Center handles on the node border */
+.canvas-dark-mode-wrapper .react-flow__handle-left {
+  left: -6px !important;
+}
+.canvas-dark-mode-wrapper .react-flow__handle-right {
+  right: -6px !important;
+}
+
+/* ========== Handle type colors (solid fill) ========== */
+.canvas-dark-mode-wrapper .react-flow__handle[data-handletype="image"] {
+  background-color: #4ade80 !important;
+}
+.canvas-dark-mode-wrapper .react-flow__handle[data-handletype="prompt"] {
+  background-color: #a78bfa !important;
+}
+.canvas-dark-mode-wrapper .react-flow__handle[data-handletype="output"] {
+  background-color: #22d3ee !important;
+}
+.canvas-dark-mode-wrapper .react-flow__handle[data-handletype="video"] {
+  background-color: #fb923c !important;
+}
+
+/* ========== Handle label visibility (text only, no dots) ========== */
+/* Labels hidden by default, appear on node hover */
+.canvas-dark-mode-wrapper .node-handle-label {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+.canvas-dark-mode-wrapper .react-flow__node:hover .node-handle-label {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Canvas page dark mode: smooth transition for canvas and UI */
+.canvas-dark-mode-wrapper .react-flow__background {
+  transition: background-color 0.5s ease;
+  background-color: #fff !important;
+}
+.canvas-dark-mode-wrapper.dark .react-flow__background {
+  background-color: #000 !important;
+}
+.canvas-dark-mode-wrapper .react-flow {
+  transition: background-color 0.5s ease;
+  background-color: #fff !important;
+}
+.canvas-dark-mode-wrapper.dark .react-flow {
+  background-color: #000 !important;
+}
+.canvas-dark-mode-wrapper .react-flow__panel {
+  transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+}
+
+/* Dark mode: high-contrast text for canvas controls */
+.canvas-dark-mode-wrapper.dark .sidebar-primary {
+  color: #fff;
+}
+.canvas-dark-mode-wrapper.dark .sidebar-secondary {
+  color: oklch(0.85 0 0);
+}
+.canvas-dark-mode-wrapper .sidebar-primary,
+.canvas-dark-mode-wrapper .sidebar-secondary {
+  transition: color 0.5s ease;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

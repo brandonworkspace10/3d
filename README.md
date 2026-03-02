@@ -96,3 +96,35 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## 2D → 3D Model Generation
+
+The 3D Modeling node calls `POST /api/generate-3d` and polls `GET /api/generate-3d?assetId=...`. The API is currently a **placeholder** (returns `{ status: "3D generation not yet connected" }`) and will be connected to a provider such as Meshy.ai later.
+
+**Run locally:** `npm run dev`, then open the canvas, add Upload + 3D Modeling nodes, connect, and run. When the API is connected, the GLB will appear inside the 3D node.
+
+### Hugging Face gated access
+
+SF3D uses the gated repo [stabilityai/stable-fast-3d](https://huggingface.co/stabilityai/stable-fast-3d). The backend reads `HF_TOKEN` or `HUGGINGFACE_HUB_TOKEN` from the environment (only presence and length are logged; the token is never printed). The same env is passed to the spawned Python process so the SF3D subprocess inherits the token.
+
+- **Env forwarding:** `lib/sf3d/run.ts` builds `env` from `process.env` (lines 51–56) and passes it to `spawn(..., { env })` (lines 61–64). The spawned process therefore receives `HF_TOKEN` / `HUGGINGFACE_HUB_TOKEN` if set.
+- **Access check:** Before running SF3D, the app runs a lightweight check that downloads a small file from the gated repo. If it fails, the API returns 401 with gated instructions.
+- **Script:** Run `./tools/sf3d-venv/bin/python scripts/check_sf3d_access.py` (or use the venv’s Python). Pass = exit 0 and cache info; Fail = exit 1 and instructions.
+- **Route:** `GET /api/sf3d-access-check` returns `{ "status": "PASS" }` or 401/500 with `{ "status": "FAIL", "error", "instructions" }`.
+
+Example PASS output from the script (no secrets printed):
+
+```
+HF gated access OK
+PASS
+Cache directory: /Users/you/.cache/huggingface/hub
+Cached files (stabilityai/stable-fast-3d): config.yaml, model.safetensors
+```
+
+## 2D → 3D Reconstruction API
+
+Async pipeline to convert 3–6 product photos into GLB + preview. See **[docs/reconstruction.md](docs/reconstruction.md)** for:
+
+- API endpoints (POST jobs, GET status, health)
+- Local setup (no Redis required for dev)
+- Example curl commands

@@ -20,11 +20,22 @@
 # production
 /build
 
+# pipeline uploads
+/public/uploads
+
+# reconstruction job outputs
+/public/storage
+
+# SF3D (cloned repo + venv)
+/tools/stable-fast-3d
+/tools/sf3d-venv
+
 # misc
 .DS_Store
 *.pem
 
 # debug
+tripo-debug.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

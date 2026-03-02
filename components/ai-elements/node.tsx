@@ -18,16 +18,33 @@ export type NodeProps = ComponentProps<typeof Card> & {
   };
 };
 
+/** Larger hit area for easier connection—default handles are ~8px. */
+const HANDLE_SIZE = 16;
+
+const handleStyle = { width: HANDLE_SIZE, height: HANDLE_SIZE };
+
 export const Node = ({ handles, className, ...props }: NodeProps) => (
   <Card
     className={cn(
-      "node-container relative size-full h-auto w-sm gap-0 rounded-md p-0",
+      "node-container relative size-full h-auto w-sm gap-0 rounded-md p-0 overflow-visible",
       className
     )}
     {...props}
   >
-    {handles.target && <Handle position={Position.Left} type="target" />}
-    {handles.source && <Handle position={Position.Right} type="source" />}
+    {handles.target && (
+      <Handle
+        position={Position.Left}
+        type="target"
+        style={handleStyle}
+      />
+    )}
+    {handles.source && (
+      <Handle
+        position={Position.Right}
+        type="source"
+        style={handleStyle}
+      />
+    )}
     {props.children}
   </Card>
 );

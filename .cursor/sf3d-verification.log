@@ -1,0 +1,132 @@
+[sf3d] process.cwd(): /Users/bren/repos/2d23d
+[sf3d] repoRoot: /Users/bren/repos/2d23d
+[sf3d] resolved pythonPath: /Users/bren/repos/2d23d/tools/sf3d-venv/bin/python
+[sf3d] existsSync(pythonPath): true
+[sf3d] resolved run.py path: /Users/bren/repos/2d23d/tools/stable-fast-3d/run.py
+[sf3d] spawn start: pythonPath=/Users/bren/repos/2d23d/tools/sf3d-venv/bin/python runPy=/Users/bren/repos/2d23d/tools/stable-fast-3d/run.py cwd=/Users/bren/repos/2d23d/tools/stable-fast-3d
+[sf3d] subprocess exit code: 1
+[sf3d] stderr: odules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 391, in forward
+    latent = self.fuse_block_in(latent, input)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 245, in forward
+    z = z + self.attn(self.norm_z1(z), self.norm_x(x) if self.norm_x_input else x)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 68, in forward
+    x = torch.nn.functional.scaled_dot_product_attention(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: MPS backend out of memory (MPS allocated: 5.08 GiB, other allocations: 10.19 GiB, max allowed: 20.13 GiB). Tried to allocate 5.09 GiB on private pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure).
+
+[sf3d] process.cwd(): /Users/bren/repos/2d23d
+[sf3d] repoRoot: /Users/bren/repos/2d23d
+[sf3d] resolved pythonPath: /Users/bren/repos/2d23d/tools/sf3d-venv/bin/python
+[sf3d] existsSync(pythonPath): true
+[sf3d] resolved run.py path: /Users/bren/repos/2d23d/tools/stable-fast-3d/run.py
+[sf3d] spawn start: pythonPath=/Users/bren/repos/2d23d/tools/sf3d-venv/bin/python runPy=/Users/bren/repos/2d23d/tools/stable-fast-3d/run.py cwd=/Users/bren/repos/2d23d/tools/stable-fast-3d
+[sf3d] subprocess exit code: 1
+[sf3d] stderr: odules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 391, in forward
+    latent = self.fuse_block_in(latent, input)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 245, in forward
+    z = z + self.attn(self.norm_z1(z), self.norm_x(x) if self.norm_x_input else x)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 68, in forward
+    x = torch.nn.functional.scaled_dot_product_attention(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: MPS backend out of memory (MPS allocated: 5.08 GiB, other allocations: 10.19 GiB, max allowed: 20.13 GiB). Tried to allocate 5.09 GiB on private pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure).
+
+[sf3d] process.cwd(): /Users/bren/repos/2d23d
+[sf3d] repoRoot: /Users/bren/repos/2d23d
+[sf3d] resolved pythonPath: /Users/bren/repos/2d23d/tools/sf3d-venv/bin/python
+[sf3d] existsSync(pythonPath): true
+[sf3d] resolved run.py path: /Users/bren/repos/2d23d/tools/stable-fast-3d/run.py
+[sf3d] spawn start: pythonPath=/Users/bren/repos/2d23d/tools/sf3d-venv/bin/python runPy=/Users/bren/repos/2d23d/tools/stable-fast-3d/run.py cwd=/Users/bren/repos/2d23d/tools/stable-fast-3d
+[sf3d] subprocess exit code: 1
+[sf3d] stderr: odules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 394, in forward
+    input = self.fuse_block_out(input, latent)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 245, in forward
+    z = z + self.attn(self.norm_z1(z), self.norm_x(x) if self.norm_x_input else x)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 68, in forward
+    x = torch.nn.functional.scaled_dot_product_attention(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: MPS backend out of memory (MPS allocated: 5.08 GiB, other allocations: 11.33 GiB, max allowed: 20.13 GiB). Tried to allocate 5.09 GiB on private pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure).
+
+[sf3d] process.cwd(): /Users/bren/repos/2d23d
+[sf3d] repoRoot: /Users/bren/repos/2d23d
+[sf3d] resolved pythonPath: /Users/bren/repos/2d23d/tools/sf3d-venv/bin/python
+[sf3d] existsSync(pythonPath): true
+[sf3d] resolved run.py path: /Users/bren/repos/2d23d/tools/stable-fast-3d/run.py
+[sf3d] spawn start: pythonPath=/Users/bren/repos/2d23d/tools/sf3d-venv/bin/python runPy=/Users/bren/repos/2d23d/tools/stable-fast-3d/run.py cwd=/Users/bren/repos/2d23d/tools/stable-fast-3d
+[sf3d] subprocess exit code: 1
+[sf3d] stderr: odules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 394, in forward
+    input = self.fuse_block_out(input, latent)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 245, in forward
+    z = z + self.attn(self.norm_z1(z), self.norm_x(x) if self.norm_x_input else x)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1776, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/sf3d-venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1787, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/bren/repos/2d23d/tools/stable-fast-3d/sf3d/models/transformers/backbone.py", line 68, in forward
+    x = torch.nn.functional.scaled_dot_product_attention(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: MPS backend out of memory (MPS allocated: 5.18 GiB, other allocations: 11.33 GiB, max allowed: 20.13 GiB). Tried to allocate 5.09 GiB on private pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure).
+
