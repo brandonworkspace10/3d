@@ -60,7 +60,8 @@ export async function POST(request: Request) {
 
     for (const url of imageUrls) {
       const inputBuffer = await loadAndConvertToSupportedFormat(url);
-      const blob = await removeBackground(new Blob([Uint8Array.from(inputBuffer)], { type: "image/png" }));
+      const bytes = new Uint8Array(inputBuffer);
+      const blob = await removeBackground(new Blob([bytes], { type: "image/png" }));
       const id = nanoid();
       const filename = `${id}.png`;
       const filepath = join(OUT_DIR, filename);

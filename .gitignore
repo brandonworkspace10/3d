@@ -29,6 +29,7 @@
 # SF3D (cloned repo + venv)
 /tools/stable-fast-3d
 /tools/sf3d-venv
+tools/sf3d-venv/
 
 # misc
 .DS_Store
