@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -45,3 +45,4 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: ["/canvas/:path*"],
 };
+

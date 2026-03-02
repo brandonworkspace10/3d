@@ -73,17 +73,20 @@ function AvatarAdjustPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-6 w-6 p-0 text-muted-foreground hover:bg-accent hover:text-foreground dark:hover:bg-white/10 dark:hover:text-white"
-          title="Adjust avatar looks"
-          aria-label="Adjust avatar looks"
-        >
-          <SlidersHorizontalIcon className="size-4" />
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={(props) => (
+          <Button
+            {...props}
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0 text-muted-foreground hover:bg-accent hover:text-foreground dark:hover:bg-white/10 dark:hover:text-white"
+            title="Adjust avatar looks"
+            aria-label="Adjust avatar looks"
+          >
+            <SlidersHorizontalIcon className="size-4" />
+          </Button>
+        )}
+      />
       <PopoverContent align="end" side="bottom" className="w-80">
         <PopoverHeader>
           <PopoverTitle>Avatar look questions</PopoverTitle>

@@ -41,14 +41,21 @@ export interface ImagenResult {
  */
 export async function generateImage(prompt: string): Promise<ImagenResult> {
   const client = getClient();
-  const instance = helpers.toValue({ prompt });
-  const parameters = helpers.toValue({ sampleCount: 1 });
+  // helpers.toValue returns a protobuf "Value"-like object, but the SDK typings vary by version.
+  // Keep this intentionally loose to avoid TS build failures on Node/Vercel.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const instance = helpers.toValue({ prompt }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const parameters = helpers.toValue({ sampleCount: 1 }) as any;
 
-  const [response] = await client.predict({
+  // The generated client has both Promise- and callback-style overloads; in strict TS
+  // this becomes a union including `void`. Force the Promise overload for Next build.
+  const predictResult = (await (client.predict({
     endpoint: getModelEndpoint(),
     instances: [instance],
     parameters,
-  });
+  }) as unknown)) as unknown as [{ predictions?: unknown[] }];
+  const response = predictResult[0];
 
   return extractFirstImage(response);
 }
@@ -62,33 +69,38 @@ export async function editImage(
   prompt: string
 ): Promise<ImagenResult> {
   const client = getClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const instance = helpers.toValue({
     prompt,
     image: { bytesBase64Encoded: imageBase64 },
-  });
+  }) as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parameters = helpers.toValue({
     sampleCount: 1,
     guidanceScale: 21,
-  });
+  }) as any;
 
-  const [response] = await client.predict({
+  const predictResult = (await (client.predict({
     endpoint: getModelEndpoint(),
     instances: [instance],
     parameters,
-  });
+  }) as unknown)) as unknown as [{ predictions?: unknown[] }];
+  const response = predictResult[0];
 
   return extractFirstImage(response);
 }
 
 function extractFirstImage(
-  response: Awaited<ReturnType<InstanceType<typeof PredictionServiceClient>["predict"]>>[0]
+  response: { predictions?: unknown[] }
 ): ImagenResult {
   const predictions = response.predictions ?? [];
   if (predictions.length === 0) {
     throw new Error("Imagen 3 returned no predictions");
   }
 
-  const fields = predictions[0].structValue?.fields;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const first = predictions[0] as any;
+  const fields = first?.structValue?.fields;
   if (!fields) {
     throw new Error("Unexpected response structure from Imagen 3");
   }

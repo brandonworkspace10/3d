@@ -112,21 +112,27 @@ const getEdgeParams = (
   };
 };
 
-const Animated = ({
-  id,
-  source,
-  target,
-  sourceHandle,
-  targetHandle,
-  sourceX: propsSourceX,
-  sourceY: propsSourceY,
-  targetX: propsTargetX,
-  targetY: propsTargetY,
-  sourcePosition: propsSourcePosition,
-  targetPosition: propsTargetPosition,
-  markerEnd,
-  style,
-}: EdgeProps) => {
+const Animated = (props: EdgeProps) => {
+  const {
+    id,
+    source,
+    target,
+    sourceX: propsSourceX,
+    sourceY: propsSourceY,
+    targetX: propsTargetX,
+    targetY: propsTargetY,
+    sourcePosition: propsSourcePosition,
+    targetPosition: propsTargetPosition,
+    markerEnd,
+    style,
+  } = props;
+
+  // EdgeProps typing in @xyflow/react does not currently expose handle ids,
+  // but ReactFlow still provides them at runtime on the edge props object.
+  const { sourceHandle, targetHandle } = props as unknown as {
+    sourceHandle?: string | null;
+    targetHandle?: string | null;
+  };
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 

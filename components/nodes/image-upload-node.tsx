@@ -269,18 +269,21 @@ export function ImageUploadNode({ id, data }: ImageUploadNodeProps) {
             <CheckCircleIcon className="size-3.5" /> Passed
             {validation.errors.length > 0 && (
               <Popover>
-                <PopoverTrigger asChild>
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    className="text-muted-foreground hover:text-foreground ml-0.5 cursor-pointer underline decoration-dotted"
-                    aria-label="Optional view issues"
-                  >
-                    ({validation.errors.length} optional view
-                    {validation.errors.length !== 1 ? "s" : ""} with issue
-                    {validation.errors.length !== 1 ? "s" : ""})
-                  </span>
-                </PopoverTrigger>
+                <PopoverTrigger
+                  render={(props) => (
+                    <span
+                      {...props}
+                      role="button"
+                      tabIndex={0}
+                      className="text-muted-foreground hover:text-foreground ml-0.5 cursor-pointer underline decoration-dotted"
+                      aria-label="Optional view issues"
+                    >
+                      ({validation.errors.length} optional view
+                      {validation.errors.length !== 1 ? "s" : ""} with issue
+                      {validation.errors.length !== 1 ? "s" : ""})
+                    </span>
+                  )}
+                />
                 <PopoverContent
                   side="top"
                   align="start"
@@ -313,16 +316,19 @@ export function ImageUploadNode({ id, data }: ImageUploadNodeProps) {
         )}
         {failed && (
           <Popover>
-            <PopoverTrigger asChild>
-              <span
-                role="button"
-                tabIndex={0}
-                className="text-destructive hover:underline flex cursor-pointer items-center gap-1 text-left text-xs"
-              >
-                <XCircleIcon className="size-3.5 shrink-0" />{" "}
-                {validation.errors.length} issue(s)
-              </span>
-            </PopoverTrigger>
+            <PopoverTrigger
+              render={(props) => (
+                <span
+                  {...props}
+                  role="button"
+                  tabIndex={0}
+                  className="text-destructive hover:underline flex cursor-pointer items-center gap-1 text-left text-xs"
+                >
+                  <XCircleIcon className="size-3.5 shrink-0" />{" "}
+                  {validation.errors.length} issue(s)
+                </span>
+              )}
+            />
             <PopoverContent
               side="top"
               align="start"

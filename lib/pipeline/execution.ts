@@ -324,7 +324,7 @@ export async function executePipeline<N extends Node<Record<string, unknown>, st
               if (statusJson.status === "success" && statusJson.glbUrl) {
                 const outputs = {
                   glb: statusJson.glbUrl,
-                  usdz: null,
+                  usdz: undefined,
                   viewerUrl: statusJson.glbUrl,
                 };
                 outputMap.set(node.id, [statusJson.glbUrl]);
@@ -359,7 +359,7 @@ export async function executePipeline<N extends Node<Record<string, unknown>, st
           } else {
             const outputs = {
               glb: json.glb,
-              usdz: json.usdz,
+              usdz: json.usdz ?? undefined,
               viewerUrl: json.viewerUrl,
             };
             outputMap.set(node.id, [json.viewerUrl ?? json.glb ?? ""]);
