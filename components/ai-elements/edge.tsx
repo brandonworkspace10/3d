@@ -40,14 +40,18 @@ const Temporary = ({
 
 const getHandleCoordsByPosition = (
   node: InternalNode<Node>,
-  handlePosition: Position
+  handlePosition: Position,
+  handleId?: string | null
 ) => {
   // Choose the handle type based on position - Left is for target, Right is for source
   const handleType = handlePosition === Position.Left ? "target" : "source";
 
-  const handle = node.internals.handleBounds?.[handleType]?.find(
-    (h) => h.position === handlePosition
-  );
+  const bounds = node.internals.handleBounds?.[handleType] ?? [];
+  const byIdAndPosition =
+    handleId != null && handleId !== ""
+      ? bounds.find((h) => h.position === handlePosition && (h as { id?: string }).id === handleId)
+      : null;
+  const handle = byIdAndPosition ?? bounds.find((h) => h.position === handlePosition);
 
   if (!handle) {
     return [0, 0] as const;
@@ -89,12 +93,14 @@ const getHandleCoordsByPosition = (
 
 const getEdgeParams = (
   source: InternalNode<Node>,
-  target: InternalNode<Node>
+  target: InternalNode<Node>,
+  sourceHandle?: string | null,
+  targetHandle?: string | null
 ) => {
   const sourcePos = Position.Right;
-  const [sx, sy] = getHandleCoordsByPosition(source, sourcePos);
+  const [sx, sy] = getHandleCoordsByPosition(source, sourcePos, sourceHandle);
   const targetPos = Position.Left;
-  const [tx, ty] = getHandleCoordsByPosition(target, targetPos);
+  const [tx, ty] = getHandleCoordsByPosition(target, targetPos, targetHandle);
 
   return {
     sourcePos,
@@ -106,7 +112,21 @@ const getEdgeParams = (
   };
 };
 
-const Animated = ({ id, source, target, markerEnd, style }: EdgeProps) => {
+const Animated = ({
+  id,
+  source,
+  target,
+  sourceHandle,
+  targetHandle,
+  sourceX: propsSourceX,
+  sourceY: propsSourceY,
+  targetX: propsTargetX,
+  targetY: propsTargetY,
+  sourcePosition: propsSourcePosition,
+  targetPosition: propsTargetPosition,
+  markerEnd,
+  style,
+}: EdgeProps) => {
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 
@@ -114,10 +134,24 @@ const Animated = ({ id, source, target, markerEnd, style }: EdgeProps) => {
     return null;
   }
 
-  const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(
-    sourceNode,
-    targetNode
-  );
+  const usePropsCoords =
+    propsSourceX != null &&
+    propsSourceY != null &&
+    propsTargetX != null &&
+    propsTargetY != null &&
+    propsSourcePosition != null &&
+    propsTargetPosition != null;
+
+  const { sx, sy, tx, ty, sourcePos, targetPos } = usePropsCoords
+    ? {
+        sx: propsSourceX,
+        sy: propsSourceY,
+        tx: propsTargetX,
+        ty: propsTargetY,
+        sourcePos: propsSourcePosition,
+        targetPos: propsTargetPosition,
+      }
+    : getEdgeParams(sourceNode, targetNode, sourceHandle, targetHandle);
 
   const [edgePath] = getBezierPath({
     sourcePosition: sourcePos,

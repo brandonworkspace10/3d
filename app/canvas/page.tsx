@@ -34,7 +34,6 @@ import {
   ChevronDownIcon,
   FileIcon,
   FilePlusIcon,
-  HistoryIcon,
   CopyIcon,
   PencilIcon,
   ShareIcon,
@@ -67,6 +66,15 @@ import type { ModelProfile } from "@/components/canvas/model-setup-card";
 import { ModelSetupCard } from "@/components/canvas/model-setup-card";
 import { getProject, saveProject } from "@/lib/projects/storage";
 import { getSavedModels, removeModel, saveModel } from "@/lib/models/storage";
+import {
+  getProject as getSupabaseProject,
+  saveCanvasState,
+  saveAsset,
+  listProjects,
+  createProject,
+  renameProject as renameSupabaseProject,
+  type SupabaseProject,
+} from "@/lib/supabase/projects";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -409,20 +417,30 @@ function CanvasInner({ projectId }: { projectId: string }) {
   const router = useRouter();
   const loadedRef = useRef(false);
 
+  // Supabase project list + project-switcher state
+  const [supabaseProjects, setSupabaseProjects] = useState<SupabaseProject[]>([]);
+  const [showProjectMenu, setShowProjectMenu] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [creatingProject, setCreatingProject] = useState(false);
+
   useEffect(() => {
     setSavedModels(getSavedModels());
   }, []);
 
+  // Load list of projects for the switcher
   useEffect(() => {
-    if (!projectId || loadedRef.current) return;
-    const p = getProject(projectId);
-    if (p) {
-      setProjectName(p.name ?? "Untitled workflow");
-      setProductType(p.productType ?? null);
-      setNodes((p.nodes?.length ? p.nodes : []) as AnyNode[]);
-      const rawEdges = (p.edges ?? []) as Edge[];
-      const nodesArr = (p.nodes ?? []) as { id?: string; type?: string }[];
-      const normalizedEdges = rawEdges.map((e) => {
+    listProjects()
+      .then(setSupabaseProjects)
+      .catch(() => {});
+  }, [projectId]);
+
+  const applyLoadedState = useCallback(
+    (rawNodes: unknown[], rawEdges: unknown[], name: string, pt: string | null) => {
+      setProjectName(name ?? "Untitled workflow");
+      setProductType((pt as "rigid" | "fabric" | "footwear" | null) ?? null);
+      setNodes((rawNodes?.length ? rawNodes : []) as AnyNode[]);
+      const nodesArr = (rawNodes ?? []) as { id?: string; type?: string }[];
+      const normalizedEdges = ((rawEdges ?? []) as Edge[]).map((e) => {
         const sourceNode = nodesArr.find((n) => n.id === e.source);
         const targetNode = nodesArr.find((n) => n.id === e.target);
         if (
@@ -444,10 +462,46 @@ function CanvasInner({ projectId }: { projectId: string }) {
         return Math.max(max, m ? parseInt(m[1], 10) : 0);
       }, 0);
       nodeCount.current = Math.max(1, maxNum + 1);
-    }
-    loadedRef.current = true;
-  }, [projectId, setNodes, setEdges]);
+    },
+    [setNodes, setEdges]
+  );
 
+  // Load canvas state — try Supabase first, fall back to localStorage
+  useEffect(() => {
+    if (!projectId || loadedRef.current) return;
+    loadedRef.current = true;
+
+    getSupabaseProject(projectId)
+      .then((sp) => {
+        if (sp) {
+          const cs = sp.canvas_state as {
+            nodes?: unknown[];
+            edges?: unknown[];
+            productType?: string | null;
+          } | null;
+          applyLoadedState(
+            cs?.nodes ?? [],
+            cs?.edges ?? [],
+            sp.name,
+            cs?.productType ?? null
+          );
+        } else {
+          // Fallback to localStorage
+          const p = getProject(projectId);
+          if (p) {
+            applyLoadedState(p.nodes ?? [], p.edges ?? [], p.name, p.productType ?? null);
+          }
+        }
+      })
+      .catch(() => {
+        const p = getProject(projectId);
+        if (p) {
+          applyLoadedState(p.nodes ?? [], p.edges ?? [], p.name, p.productType ?? null);
+        }
+      });
+  }, [projectId, applyLoadedState]);
+
+  // Auto-save to localStorage (fast, synchronous)
   useEffect(() => {
     if (!projectId || !loadedRef.current) return;
     const t = setTimeout(() => {
@@ -463,10 +517,23 @@ function CanvasInner({ projectId }: { projectId: string }) {
     return () => clearTimeout(t);
   }, [projectId, projectName, nodes, edges, productType]);
 
+  // Auto-save to Supabase (debounced 1.5 s to reduce writes)
+  useEffect(() => {
+    if (!projectId || !loadedRef.current) return;
+    const t = setTimeout(() => {
+      saveCanvasState(projectId, { nodes, edges, productType });
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [projectId, nodes, edges, productType]);
+
   const handleRename = useCallback(() => {
     const next = window.prompt("Rename project", projectName);
-    if (next != null && next.trim()) setProjectName(next.trim());
-  }, [projectName]);
+    if (next != null && next.trim()) {
+      const trimmed = next.trim();
+      setProjectName(trimmed);
+      renameSupabaseProject(projectId, trimmed).catch(() => {});
+    }
+  }, [projectName, projectId]);
 
   const onConnectEnd = useCallback<OnConnectEnd>((event, connectionState) => {
     connectionEndRef.current?.handleConnectEnd(event, connectionState);
@@ -840,10 +907,36 @@ function CanvasInner({ projectId }: { projectId: string }) {
     setRunning(true);
     try {
       await executePipeline(nodes, edges, setNodes, setEdges);
+
+      // After execution, persist any newly generated output URLs to Supabase assets
+      setNodes((latestNodes) => {
+        const assetNodeTypes: Record<
+          string,
+          "render" | "video"
+        > = {
+          lighting: "render",
+          backgroundReplace: "render",
+          spinVideo: "video",
+        };
+        for (const n of latestNodes) {
+          const assetType = assetNodeTypes[n.type ?? ""];
+          if (!assetType) continue;
+          const d = n.data as Record<string, unknown>;
+          const outputUrls: string[] = Array.isArray(d.outputUrls)
+            ? (d.outputUrls as string[])
+            : d.outputUrl
+              ? [d.outputUrl as string]
+              : [];
+          for (const url of outputUrls) {
+            if (url) saveAsset(projectId, assetType, url).catch(() => {});
+          }
+        }
+        return latestNodes;
+      });
     } finally {
       setRunning(false);
     }
-  }, [nodes, edges, setNodes, setEdges]);
+  }, [nodes, edges, setNodes, setEdges, projectId]);
 
   const handleViewOutput = useCallback(() => {
     const outputNode = nodes.find((n) => n.id === "pipeline-output");
@@ -859,7 +952,7 @@ function CanvasInner({ projectId }: { projectId: string }) {
     <div
       className={`canvas-dark-mode-wrapper h-screen w-screen transition-colors duration-500 ease-in-out ${isDarkMode ? "dark bg-black" : "bg-white"}`}
     >
-      {/* Top-left: 23D brand + project name */}
+      {/* Top-left: 23D brand + project name + project switcher */}
       <div className="fixed left-5 top-5 z-50 flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -874,7 +967,7 @@ function CanvasInner({ projectId }: { projectId: string }) {
             align="start"
             side="bottom"
             sideOffset={8}
-            className="w-48 border-border/60 bg-neutral-900/95 text-neutral-100 backdrop-blur-sm"
+            className="w-56 border-border/60 bg-neutral-900/95 text-neutral-100 backdrop-blur-sm"
           >
             <DropdownMenuItem
               className="cursor-pointer focus:bg-neutral-800"
@@ -885,14 +978,14 @@ function CanvasInner({ projectId }: { projectId: string }) {
             </DropdownMenuItem>
             <DropdownMenuItem
               className="cursor-pointer focus:bg-neutral-800"
-              onClick={() => router.push("/dashboard")}
+              onClick={() => {
+                setCreatingProject(true);
+                setNewProjectName("");
+                setShowProjectMenu(true);
+              }}
             >
               <FilePlusIcon className="mr-2 size-4" />
-              New workflow
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-default focus:bg-neutral-800">
-              <HistoryIcon className="mr-2 size-4" />
-              Open recent
+              New project
             </DropdownMenuItem>
             <DropdownMenuItem className="cursor-default focus:bg-neutral-800">
               <CopyIcon className="mr-2 size-4" />
@@ -904,14 +997,128 @@ function CanvasInner({ projectId }: { projectId: string }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <button
-          type="button"
-          onClick={handleRename}
-          className="group/name flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground dark:text-neutral-400 dark:hover:text-neutral-200"
-        >
-          <span className="truncate">{projectName}</span>
-          <PencilIcon className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover/name:opacity-70" />
-        </button>
+
+        {/* Project name / switcher */}
+        <DropdownMenu open={showProjectMenu} onOpenChange={setShowProjectMenu}>
+          <DropdownMenuTrigger
+            render={(props) => (
+              <button
+                {...props}
+                type="button"
+                className="group/name flex cursor-pointer items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground dark:text-neutral-400 dark:hover:text-neutral-200"
+                onClick={() => {
+                  setCreatingProject(false);
+                  listProjects().then(setSupabaseProjects).catch(() => {});
+                }}
+              >
+                <span className="max-w-[160px] truncate">{projectName}</span>
+                <ChevronDownIcon className="size-3 shrink-0 opacity-50" />
+              </button>
+            )}
+          />
+          <DropdownMenuContent
+            align="start"
+            side="bottom"
+            sideOffset={4}
+            className="w-64 border-border/60 bg-neutral-900/95 text-neutral-100 backdrop-blur-sm"
+          >
+            {creatingProject ? (
+              <div className="flex flex-col gap-2 p-2">
+                <p className="text-xs font-medium text-neutral-400">New project name</p>
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="My project"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  onKeyDown={async (e) => {
+                    if (e.key === "Enter" && newProjectName.trim()) {
+                      const proj = await createProject(newProjectName.trim());
+                      setShowProjectMenu(false);
+                      setCreatingProject(false);
+                      router.push(`/canvas/${proj.id}`);
+                    } else if (e.key === "Escape") {
+                      setShowProjectMenu(false);
+                      setCreatingProject(false);
+                    }
+                  }}
+                  className="rounded-md border border-white/10 bg-neutral-800 px-2 py-1.5 text-sm text-white placeholder-neutral-500 focus:border-white/30 focus:outline-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="flex-1 rounded-md bg-white px-2 py-1 text-xs font-semibold text-neutral-900 hover:bg-neutral-200 disabled:opacity-50"
+                    disabled={!newProjectName.trim()}
+                    onClick={async () => {
+                      const proj = await createProject(newProjectName.trim());
+                      setShowProjectMenu(false);
+                      setCreatingProject(false);
+                      router.push(`/canvas/${proj.id}`);
+                    }}
+                  >
+                    Create
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md px-2 py-1 text-xs text-neutral-400 hover:text-white"
+                    onClick={() => {
+                      setShowProjectMenu(false);
+                      setCreatingProject(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <DropdownMenuLabel className="text-xs text-neutral-500">
+                  Switch project
+                </DropdownMenuLabel>
+                {supabaseProjects.length === 0 && (
+                  <div className="px-3 py-2 text-xs text-neutral-500">No projects yet</div>
+                )}
+                {supabaseProjects.map((p) => (
+                  <DropdownMenuItem
+                    key={p.id}
+                    className={`cursor-pointer focus:bg-neutral-800 ${p.id === projectId ? "font-semibold text-white" : ""}`}
+                    onClick={() => {
+                      if (p.id !== projectId) router.push(`/canvas/${p.id}`);
+                      setShowProjectMenu(false);
+                    }}
+                  >
+                    <span className="truncate">{p.name}</span>
+                    {p.id === projectId && (
+                      <span className="ml-auto text-[10px] text-neutral-500">current</span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+                <div className="my-1 h-px bg-white/10" />
+                <DropdownMenuItem
+                  className="cursor-pointer focus:bg-neutral-800"
+                  onClick={() => {
+                    setCreatingProject(true);
+                    setNewProjectName("");
+                  }}
+                >
+                  <FilePlusIcon className="mr-2 size-4" />
+                  New project
+                </DropdownMenuItem>
+                <div className="my-1 h-px bg-white/10" />
+                <DropdownMenuItem
+                  className="cursor-pointer focus:bg-neutral-800"
+                  onClick={() => {
+                    handleRename();
+                    setShowProjectMenu(false);
+                  }}
+                >
+                  <PencilIcon className="mr-2 size-4" />
+                  Rename
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Left sidebar – Product / Avatar selector + Add Node */}
