@@ -8,7 +8,7 @@ const OUT_DIR = join(process.cwd(), "public", "uploads", "no-bg");
 /** Formats supported by @imgly/background-removal-node (avif/heif are not). */
 const SUPPORTED_FORMATS = new Set(["jpeg", "jpg", "png", "webp"]);
 
-async function loadAndConvertToSupportedFormat(url: string): Promise<Buffer> {
+async function loadAndConvertToSupportedFormat(url: string): Promise<Uint8Array> {
   let buffer: Buffer;
   if (url.startsWith("http")) {
     const res = await fetch(url);
@@ -21,9 +21,9 @@ async function loadAndConvertToSupportedFormat(url: string): Promise<Buffer> {
   const meta = await sharp(buffer).metadata();
   const format = (meta.format as string)?.toLowerCase?.();
   if (format && SUPPORTED_FORMATS.has(format)) {
-    return buffer;
+    return new Uint8Array(buffer);
   }
-  return sharp(buffer).png().toBuffer();
+  return new Uint8Array(await sharp(buffer).png().toBuffer());
 }
 
 export async function POST(request: Request) {
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     for (const url of imageUrls) {
       const inputBuffer = await loadAndConvertToSupportedFormat(url);
-      const blob = await removeBackground(new Blob([new Uint8Array(inputBuffer)], { type: "image/png" })); // fixed
+      const blob = await removeBackground(new Blob([inputBuffer], { type: "image/png" }));
       const id = nanoid();
       const filename = `${id}.png`;
       const filepath = join(OUT_DIR, filename);
