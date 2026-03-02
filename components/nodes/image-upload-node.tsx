@@ -69,6 +69,13 @@ export function ImageUploadNode({ id, data }: ImageUploadNodeProps) {
       filesToUpload.forEach((f) => formData.append("files", f));
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (!res.ok) {
+        let msg = "Upload failed";
+        try {
+          const errJson = (await res.json()) as { error?: string };
+          if (errJson?.error) msg = errJson.error;
+        } catch {
+          // ignore
+        }
         setNodes((nodes) =>
           nodes.map((n) =>
             n.id === id
@@ -78,7 +85,7 @@ export function ImageUploadNode({ id, data }: ImageUploadNodeProps) {
                     ...n.data,
                     validation: {
                       status: "failed" as const,
-                      errors: [{ imageId: "", type: "blur" as const, message: "Upload failed" }],
+                      errors: [{ imageId: "", type: "blur" as const, message: msg }],
                     },
                   },
                 }

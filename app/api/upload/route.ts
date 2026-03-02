@@ -2,6 +2,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import sharp from "sharp";
 import { nanoid } from "nanoid";
+import { put } from "@vercel/blob";
 
 const MIN_SIDE = 1024;
 const LAPLACIAN_THRESHOLD = 100; // below this = blurry
@@ -35,8 +36,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    await mkdir(UPLOADS_DIR, { recursive: true });
 
     const results: UploadImageResult[] = [];
 
@@ -72,9 +71,21 @@ export async function POST(request: Request) {
       //     message: `Resolution must be at least ${MIN_SIDE}px on the shortest side`,
       //   });
 
-      await writeFile(filepath, buffer);
+      const shouldUseBlob =
+        process.env.VERCEL === "1" || !!process.env.BLOB_READ_WRITE_TOKEN;
 
-      const url = `/uploads/${filename}`;
+      let url: string;
+      if (shouldUseBlob) {
+        const blob = await put(`uploads/${filename}`, buffer, {
+          access: "public",
+          contentType: file.type || "application/octet-stream",
+        });
+        url = blob.url;
+      } else {
+        await mkdir(UPLOADS_DIR, { recursive: true });
+        await writeFile(filepath, buffer);
+        url = `/uploads/${filename}`;
+      }
       results.push({
         id,
         url,
